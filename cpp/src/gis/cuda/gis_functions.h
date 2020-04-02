@@ -23,7 +23,6 @@
 
 #include "arrow/api.h"
 #include "arrow/array.h"
-
 #include "utils/arrow_alias.h"
 
 namespace arctern {
@@ -31,7 +30,6 @@ namespace gis {
 namespace cuda {
 
 /**************************** GEOMETRY CONSTRUCTOR ***************************/
-
 
 WkbArrayPtr ST_Point(const DoubleArrayPtr& x_values, const DoubleArrayPtr& y_values);
 
@@ -57,7 +55,6 @@ WkbArrayPtr ST_Point(const DoubleArrayPtr& x_values, const DoubleArrayPtr& y_val
 //
 // std::shared_ptr<arrow::Array> ST_NPoints(const std::shared_ptr<arrow::Array>&
 // geometries);
-
 
 WkbArrayPtr ST_Envelope(const WkbArrayPtr& input_geo);
 
