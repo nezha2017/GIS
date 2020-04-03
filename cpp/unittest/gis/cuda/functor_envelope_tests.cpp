@@ -31,17 +31,16 @@ TEST(FunctorEnvelope, naive) {
   using std::string;
   using std::vector;
   vector<std::pair<string, double>> raw_data = {
-      {"POLYGON((0 2, -2 -2, 2 -2, 0 2),(0 1, -1 -1, 1 -1, 0 1))", 4 * 4 },
+      {"POLYGON((0 2, -2 -2, 2 -2, 0 2),(0 1, -1 -1, 1 -1, 0 1))", 4 * 4},
       {"POLYGON((0 0, 1 0, 1 1, 1 0, 0 0))", 1},
       {"LINESTRING(3 4, 6 8, 7 2)", (7 - 3) * (8 - 2)},
       {"POINT EMPTY", 0},
       {"POLYGON EMPTY", 0},
       {"LINESTRING EMPTY", 0},
-
   };
   vector<string> raw;
   vector<double> std_results;
-  for(auto& pr: raw_data) {
+  for (auto& pr : raw_data) {
     raw.push_back(pr.first);
     std_results.push_back(pr.second);
   }
