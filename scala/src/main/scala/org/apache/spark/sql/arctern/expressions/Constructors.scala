@@ -27,21 +27,43 @@ case class ST_GeomFromText(inputExpr: Seq[Expression]) extends Expression {
 
   assert(inputExpr.length == 1)
 
-  override def nullable: Boolean = true
+  override def nullable: Boolean = inputExpr.head.nullable
 
   override def eval(input: InternalRow): Any = {}
 
   override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = {
-    val wkt = inputExpr.head.genCode(ctx)
+    val wktExpr = inputExpr.head
+    val wktGen = inputExpr.head.genCode(ctx)
 
-    ev.copy(code =
-      code"""
-          ${wkt.code}
+    val resultCode =
+      s"""
+         |${ev.value}_geo = ${GeometryUDT.getClass().getName().dropRight(1)}.FromWkt(${wktGen.value}.toString());
+         |${CodeGenerator.javaType(ArrayType(ByteType, containsNull = false))} ${ev.value} = ${GeometryUDT.getClass().getName().dropRight(1)}.GeomSerialize(${ev.value}_geo);
+       """.stripMargin
 
+    if(nullable){
+      val nullSafeEval =
+      wktGen.code + ctx.nullSafeExec(wktExpr.nullable,wktGen.isNull){
+        s"""
+           |${ev.isNull} = false; // resultCode could change nullability.
+           |$resultCode
+           |""".stripMargin
+      }
+      ev.copy(code=
+        code"""
+          boolean ${ev.isNull} = true;
           org.locationtech.jts.geom.Geometry ${ev.value}_geo = null;
-          ${ev.value}_geo = ${GeometryUDT.getClass().getName().dropRight(1)}.FromWkt(${wkt.value}.toString());
-          ${CodeGenerator.javaType(ArrayType(ByteType, containsNull = false))} ${ev.value} = ${GeometryUDT.getClass().getName().dropRight(1)}.GeomSerialize(${ev.value}_geo);
+          $nullSafeEval
+            """)
+    }
+    else {
+      ev.copy(code =
+        code"""
+          ${wktGen.code}
+          org.locationtech.jts.geom.Geometry ${ev.value}_geo = null;
+          $resultCode
           """, FalseLiteral)
+    }
   }
 
   override def dataType: DataType = new GeometryUDT
