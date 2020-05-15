@@ -25,7 +25,7 @@ case class ST_GeomFromText(inputExpr: Seq[Expression]) extends Expression {
   import org.apache.spark.sql.catalyst.expressions.codegen._
   import org.apache.spark.sql.catalyst.expressions.codegen.Block._
 
-  override def nullable: Boolean = false
+  override def nullable: Boolean = true
 
   override def eval(input: InternalRow): Any = {}
 
