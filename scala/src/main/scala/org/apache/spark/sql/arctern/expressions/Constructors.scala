@@ -67,7 +67,7 @@ case class ST_GeomFromText(inputExpr: Seq[Expression]) extends Expression {
     }
   }
 
-  override def dataType: DataType = ArrayType(ByteType, false)
+  override def dataType: DataType = new GeometryUDT
 
   override def children: Seq[Expression] = inputExpr
 }
