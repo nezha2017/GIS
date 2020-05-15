@@ -23,20 +23,22 @@ import org.locationtech.jts.io.{WKBReader, WKBWriter, WKTReader, WKTWriter, Pars
 class GeometryUDT extends UserDefinedType[Geometry] {
   override def sqlType: DataType = ArrayType(ByteType, containsNull = false)
 
-  override def serialize(obj: Geometry): GenericArrayData = {
-    new GenericArrayData(GeometryUDT.ToWkb(obj))
-  }
+  override def serialize(obj: Geometry): GenericArrayData = GeometryUDT.GeomSerialize(obj)
 
-  override def deserialize(datum: Any): Geometry = {
-    datum match {
-      case values: ArrayData => GeometryUDT.FromWkb(values.toByteArray())
-    }
-  }
+  override def deserialize(datum: Any): Geometry = GeometryUDT.GeomDeserialize(datum)
 
   override def userClass: Class[Geometry] = classOf[Geometry]
 }
 
 object GeometryUDT {
+  def GeomSerialize(obj: Geometry): GenericArrayData = new GenericArrayData(ToWkb(obj))
+
+  def GeomDeserialize(datum: Any): Geometry = {
+    datum match {
+      case values: ArrayData => FromWkb(values.toByteArray())
+    }
+  }
+
   def ToWkb(obj: Geometry) = new WKBWriter().write(obj)
 
   def FromWkb(obj: Array[Byte]): Geometry = {
