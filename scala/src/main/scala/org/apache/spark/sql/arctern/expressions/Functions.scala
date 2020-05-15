@@ -46,14 +46,33 @@ case class ST_Within(inputExpr: Seq[Expression]) extends Expression {
          |${ev.value} = ${ev.value}_left.within(${ev.value}_right);
          |""".stripMargin
 
-    ev.copy(code =
-      code"""
+    if (nullable) {
+      val nullSafeEval =
+        leftCode.code + ctx.nullSafeExec(left.nullable, leftCode.isNull) {
+          rightCode.code + ctx.nullSafeExec(right.nullable, rightCode.isNull) {
+            s"""
+               |${ev.isNull} = false; // resultCode could change nullability.
+               |$resultCode
+               |""".stripMargin
+          }
+        }
+      ev.copy(code=
+        code"""
+            boolean ${ev.isNull} = true;
+            ${CodeGenerator.javaType(BooleanType)} ${ev.value} = ${CodeGenerator.defaultValue(BooleanType)};
+            $nullSafeEval
+            """)
+
+    }
+    else {
+      ev.copy(code =
+        code"""
           ${leftCode.code}
           ${rightCode.code}
-
           ${CodeGenerator.javaType(BooleanType)} ${ev.value} = ${CodeGenerator.defaultValue(BooleanType)};
           $resultCode
           """, FalseLiteral)
+    }
   }
 
   override def dataType: DataType = BooleanType
