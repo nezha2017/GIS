@@ -37,22 +37,23 @@ case class ST_GeomFromText(inputExpr: Seq[Expression]) extends Expression {
 
     val resultCode =
       s"""
+         |org.locationtech.jts.geom.Geometry ${ev.value}_geo = null;
          |${ev.value}_geo = ${GeometryUDT.getClass().getName().dropRight(1)}.FromWkt(${wktGen.value}.toString());
-         |${CodeGenerator.javaType(ArrayType(ByteType, containsNull = false))} ${ev.value} = ${GeometryUDT.getClass().getName().dropRight(1)}.GeomSerialize(${ev.value}_geo);
+         |${ev.value} = ${GeometryUDT.getClass().getName().dropRight(1)}.GeomSerialize(${ev.value}_geo);
        """.stripMargin
 
-    if(nullable){
+    if (nullable) {
       val nullSafeEval =
-      wktGen.code + ctx.nullSafeExec(wktExpr.nullable,wktGen.isNull){
-        s"""
-           |${ev.isNull} = false; // resultCode could change nullability.
-           |$resultCode
-           |""".stripMargin
-      }
-      ev.copy(code=
+        wktGen.code + ctx.nullSafeExec(wktExpr.nullable, wktGen.isNull) {
+          s"""
+             |${ev.isNull} = false; // resultCode could change nullability.
+             |$resultCode
+             |""".stripMargin
+        }
+      ev.copy(code =
         code"""
           boolean ${ev.isNull} = true;
-          org.locationtech.jts.geom.Geometry ${ev.value}_geo = null;
+          ${CodeGenerator.javaType(ArrayType(ByteType, containsNull = false))} ${ev.value} = ${CodeGenerator.defaultValue(dataType)};
           $nullSafeEval
             """)
     }
@@ -60,13 +61,13 @@ case class ST_GeomFromText(inputExpr: Seq[Expression]) extends Expression {
       ev.copy(code =
         code"""
           ${wktGen.code}
-          org.locationtech.jts.geom.Geometry ${ev.value}_geo = null;
+          ${CodeGenerator.javaType(ArrayType(ByteType, containsNull = false))} ${ev.value} = ${CodeGenerator.defaultValue(dataType)};
           $resultCode
           """, FalseLiteral)
     }
   }
 
-  override def dataType: DataType = new GeometryUDT
+  override def dataType: DataType = ArrayType(ByteType, false)
 
   override def children: Seq[Expression] = inputExpr
 }
