@@ -19,11 +19,10 @@ import org.apache.spark.sql.arctern.GeometryUDT
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.types.{ArrayType, ByteType, DataType}
+import org.apache.spark.sql.catalyst.expressions.codegen._
+import org.apache.spark.sql.catalyst.expressions.codegen.Block._
 
 case class ST_GeomFromText(inputExpr: Seq[Expression]) extends Expression {
-
-  import org.apache.spark.sql.catalyst.expressions.codegen._
-  import org.apache.spark.sql.catalyst.expressions.codegen.Block._
 
   assert(inputExpr.length == 1)
 
