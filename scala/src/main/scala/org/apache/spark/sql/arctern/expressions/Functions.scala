@@ -15,7 +15,7 @@
  */
 package org.apache.spark.sql.arctern.expressions
 
-import org.apache.spark.sql.arctern.GeometryUDT
+import org.apache.spark.sql.arctern.{CodeGenUtil, GeometryUDT}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.types.{BooleanType, DataType}
@@ -39,8 +39,8 @@ case class ST_Within(inputExpr: Seq[Expression]) extends Expression {
 
     val resultCode =
       s"""
-         |org.locationtech.jts.geom.Geometry ${ev.value}_left = null;
-         |org.locationtech.jts.geom.Geometry ${ev.value}_right = null;
+         |${CodeGenUtil.mutableGeometryInitCode(ev.value + "_left")}
+         |${CodeGenUtil.mutableGeometryInitCode(ev.value + "_right")}
          |${ev.value}_left = ${GeometryUDT.getClass().getName().dropRight(1)}.GeomDeserialize(${leftCode.value});
          |${ev.value}_right = ${GeometryUDT.getClass().getName().dropRight(1)}.GeomDeserialize(${rightCode.value});
          |${ev.value} = ${ev.value}_left.within(${ev.value}_right);

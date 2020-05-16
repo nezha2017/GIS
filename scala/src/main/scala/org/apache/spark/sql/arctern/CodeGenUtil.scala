@@ -15,12 +15,18 @@
  */
 package org.apache.spark.sql.arctern
 
-import org.apache.spark.sql.catalyst.expressions.codegen._
+import org.apache.spark.sql.catalyst.expressions.codegen.ExprCode
 
-object CodeGenerator {
+object CodeGenUtil {
   def extractGeometryConstructor(exprCode: ExprCode) = {
     val serialKeyWords = s"${GeometryUDT.getClass().getName().dropRight(1)}.GeomSerialize"
     val codeString = exprCode.code.toString()
+    val serialIdx = codeString.lastIndexOf(serialKeyWords)
+
+    if (serialIdx == -1) {
+      throw new RuntimeException(s"can't find ${serialKeyWords} in the code string")
+    }
   }
 
+  def mutableGeometryInitCode(geo_name: String) = s"org.locationtech.jts.geom.Geometry $geo_name = null;"
 }
