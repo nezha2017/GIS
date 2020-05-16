@@ -96,12 +96,22 @@ abstract class ST_UnaryOp(f: String => String) extends Expression {
 
     val (inputGeo, inputGeoDeclare, inputGeoCode) = CodeGenUtil.extractGeometryConstructor(inputCode.code.toString())
 
+    val assignment: String = dataType match {
+      case _: GeometryUDT =>
+        s"""
+           |${CodeGenUtil.mutableGeometryInitCode(s"${ev.value}_geo")}
+           |${ev.value}_geo = ${f(inputGeo)};
+           |${ev.value} = ${CodeGenUtil.serialGeometryCode(s"${ev.value}_geo")}
+           |""".stripMargin
+      case _ => s"${ev.value} = ${f(inputGeo)};"
+    }
+
     if (nullable) {
       val nullSafeEval =
         inputGeoCode + ctx.nullSafeExec(inputExpr.nullable, inputCode.isNull) {
           s"""
              |${ev.isNull} = false; // resultCode could change nullability.
-             |${ev.value} = ${f(inputGeo)};
+             |$assignment
              |""".stripMargin
         }
       ev.copy(code =
@@ -115,8 +125,9 @@ abstract class ST_UnaryOp(f: String => String) extends Expression {
       ev.copy(code =
         code"""
             $inputGeoDeclare
+            $inputGeoCode
             ${CodeGenerator.javaType(dataType)} ${ev.value} = ${CodeGenerator.defaultValue(dataType)};
-            ${ev.value} = ${f(inputGeo)};
+            $assignment
             """, FalseLiteral)
     }
   }

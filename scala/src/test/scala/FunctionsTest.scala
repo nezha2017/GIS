@@ -33,7 +33,7 @@ class FunctionsTest extends AdapterTest {
     df.createOrReplaceTempView("table_ST_Within")
     val rst = spark.sql("select idx, ST_Within(ST_GeomFromText(geo1), ST_GeomFromText(geo2)) from table_ST_Within")
 
-//    rst.queryExecution.debug.codegen()
+    //    rst.queryExecution.debug.codegen()
     val collect = rst.collect()
 
     assert(collect(0).getBoolean(1) == true)
@@ -58,7 +58,7 @@ class FunctionsTest extends AdapterTest {
     df.createOrReplaceTempView("table_ST_Within")
     val rst = spark.sql("select idx, ST_Within(ST_GeomFromText(geo1), ST_GeomFromText(geo2)) from table_ST_Within")
 
-//    rst.queryExecution.debug.codegen()
+    //    rst.queryExecution.debug.codegen()
     val collect = rst.collect()
 
     assert(collect(0).isNullAt(1))
@@ -68,4 +68,21 @@ class FunctionsTest extends AdapterTest {
 
     rst.show(false)
   }
+
+  test("ST_Centroid") {
+    val data = Seq(
+      Row(1, "Polygon(0 0, 0 1, 1 1, 1 0, 0 0)"),
+      Row(2, "LINESTRING (0 0, 10 10, 20 20)")
+    )
+
+    val schema = StructType(Array(StructField("idx", IntegerType, false), StructField("geo", StringType, false)))
+    val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
+    df.createOrReplaceTempView("data")
+
+    val rst = spark.sql("select idx, ST_Centroid(ST_GeomFromText(geo)) from data ")
+//    rst.queryExecution.debug.codegen()
+    rst.show()
+
+  }
+
 }

@@ -59,4 +59,6 @@ object CodeGenUtil {
   }
 
   def mutableGeometryInitCode(geo_name: String) = s"org.locationtech.jts.geom.Geometry $geo_name = null;"
+
+  def serialGeometryCode(geo_code:String) = s"${GeometryUDT.getClass().getName().dropRight(1)}.GeomSerialize($geo_code);"
 }
