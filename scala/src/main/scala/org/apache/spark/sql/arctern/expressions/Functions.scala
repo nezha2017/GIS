@@ -65,8 +65,8 @@ case class ST_Within(inputExpr: Seq[Expression]) extends Expression {
         code"""
           $leftGeoDeclare
           $rightGeoDeclare
-          ${leftCode.code}
-          ${rightCode.code}
+          $leftGeoCode
+          $rightGeoCode
           ${CodeGenerator.javaType(BooleanType)} ${ev.value} = ${CodeGenerator.defaultValue(BooleanType)};
           ${ev.value} = $leftGeo.within($rightGeo);
           """, FalseLiteral)
