@@ -15,14 +15,14 @@
  */
 package org.apache.spark.sql.arctern.expressions
 
-import org.apache.spark.sql.arctern.{CodeGenUtil, GeometryUDT}
+import org.apache.spark.sql.arctern.{ArcternExpr, CodeGenUtil, GeometryUDT}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.types.{BooleanType, DataType}
 import org.apache.spark.sql.catalyst.expressions.codegen._
 import org.apache.spark.sql.catalyst.expressions.codegen.Block._
 
-abstract class ST_BinaryOp(f: (String, String) => String) extends Expression {
+abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
 
   def leftExpr: Expression
 
@@ -79,7 +79,7 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends Expression {
 
 }
 
-abstract class ST_UnaryOp(f: String => String) extends Expression {
+abstract class ST_UnaryOp(f: String => String) extends ArcternExpr {
 
   def inputExpr: Expression
 
