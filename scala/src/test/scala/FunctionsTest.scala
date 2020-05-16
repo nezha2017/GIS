@@ -71,7 +71,7 @@ class FunctionsTest extends AdapterTest {
 
   test("ST_Centroid") {
     val data = Seq(
-      Row(1, "Polygon(0 0, 0 1, 1 1, 1 0, 0 0)"),
+      Row(1, "Polygon((0 0, 0 1, 1 1, 1 0, 0 0))"),
       Row(2, "LINESTRING (0 0, 10 10, 20 20)")
     )
 
@@ -80,8 +80,29 @@ class FunctionsTest extends AdapterTest {
     df.createOrReplaceTempView("data")
 
     val rst = spark.sql("select idx, ST_Centroid(ST_GeomFromText(geo)) from data ")
-//    rst.queryExecution.debug.codegen()
+    //    val rst = spark.sql("select idx, ST_GeomFromText(geo) from data")
+    //    rst.queryExecution.debug.codegen()
     rst.show()
+
+  }
+
+  test("ST_Centroid with null") {
+    val data = Seq(
+      Row(1, "Polygon(0 0, 0 1, 1 1, 1 0, 0 0)"),
+      Row(2, "LINESTRING (0 0, 10 10, 20 20)"),
+      Row(3, null)
+    )
+
+    val schema = StructType(Array(StructField("idx", IntegerType, false), StructField("geo", StringType, true)))
+    val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
+    df.createOrReplaceTempView("data")
+
+    val rst = spark.sql("select idx, ST_Centroid(ST_GeomFromText(geo)) from data ")
+    //    val rst = spark.sql("select idx, ST_GeomFromText(geo) from data")
+    //    rst.queryExecution.debug.codegen()
+    val collect = rst.collect()
+    assert(collect(0).isNullAt(1))
+    assert(collect(2).isNullAt(1))
 
   }
 

@@ -27,7 +27,7 @@ case class ST_GeomFromText(inputExpr: Seq[Expression]) extends Expression {
 
   assert(inputExpr.length == 1)
 
-  override def nullable: Boolean = inputExpr.head.nullable
+  override def nullable: Boolean = true
 
   override def eval(input: InternalRow): Any = {}
 
@@ -35,36 +35,23 @@ case class ST_GeomFromText(inputExpr: Seq[Expression]) extends Expression {
     val wktExpr = inputExpr.head
     val wktGen = inputExpr.head.genCode(ctx)
 
-    val resultCode =
-      s"""
-         |${CodeGenUtil.mutableGeometryInitCode(ev.value + "_geo")}
-         |${ev.value}_geo = ${GeometryUDT.getClass().getName().dropRight(1)}.FromWkt(${wktGen.value}.toString());
-         |${ev.value} = ${CodeGenUtil.serialGeometryCode(s"${ev.value}_geo")}
+    val nullSafeEval =
+      wktGen.code + ctx.nullSafeExec(wktExpr.nullable, wktGen.isNull) {
+        s"""
+           |${ev.value}_geo = ${GeometryUDT.getClass().getName().dropRight(1)}.FromWkt(${wktGen.value}.toString());
+           |if (${ev.value}_geo != null) {
+           |  ${ev.value} = ${CodeGenUtil.serialGeometryCode(s"${ev.value}_geo")}
+           |}
        """.stripMargin
-
-    if (nullable) {
-      val nullSafeEval =
-        wktGen.code + ctx.nullSafeExec(wktExpr.nullable, wktGen.isNull) {
-          s"""
-             |${ev.isNull} = false; // resultCode could change nullability.
-             |$resultCode
-             |""".stripMargin
-        }
-      ev.copy(code =
-        code"""
-          boolean ${ev.isNull} = true;
+      }
+    ev.copy(code =
+      code"""
+          ${CodeGenUtil.mutableGeometryInitCode(ev.value + "_geo")}
           ${CodeGenerator.javaType(ArrayType(ByteType, containsNull = false))} ${ev.value} = ${CodeGenerator.defaultValue(dataType)};
           $nullSafeEval
+          boolean ${ev.isNull} = (${ev.value}_geo == null);
             """)
-    }
-    else {
-      ev.copy(code =
-        code"""
-          ${wktGen.code}
-          ${CodeGenerator.javaType(ArrayType(ByteType, containsNull = false))} ${ev.value} = ${CodeGenerator.defaultValue(dataType)};
-          $resultCode
-          """, FalseLiteral)
-    }
+
   }
 
   override def dataType: DataType = new GeometryUDT
