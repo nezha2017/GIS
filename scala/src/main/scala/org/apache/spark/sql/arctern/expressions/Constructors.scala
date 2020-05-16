@@ -39,9 +39,7 @@ case class ST_GeomFromText(inputExpr: Seq[Expression]) extends Expression {
       wktGen.code + ctx.nullSafeExec(wktExpr.nullable, wktGen.isNull) {
         s"""
            |${ev.value}_geo = ${GeometryUDT.getClass().getName().dropRight(1)}.FromWkt(${wktGen.value}.toString());
-           |if (${ev.value}_geo != null) {
-           |  ${ev.value} = ${CodeGenUtil.serialGeometryCode(s"${ev.value}_geo")}
-           |}
+           |if (${ev.value}_geo != null) ${ev.value} = ${CodeGenUtil.serialGeometryCode(s"${ev.value}_geo")}
        """.stripMargin
       }
     ev.copy(code =
