@@ -51,16 +51,18 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
     val rightCode = rightExpr.genCode(ctx)
 
     if(CodeGenUtil.isArcternExpr(leftExpr)){
-      val (geo, declare, code) = CodeGenUtil.extractGeometryConstructor(leftCode.code.toString())
+      val (geo, declare, code) = CodeGenUtil.geometryFromArcternExpr(leftCode.code.toString())
       leftGeo = geo; leftGeoDeclare = declare; leftGeoCode = code
-    }else{
-      println("============= leftCode =================")
-      println(leftCode.code.toString)
-      println("==============================")
+    } else {
+      val (geo, declare, code) = CodeGenUtil.geometryFromNormalExpr(leftCode.code.toString())
+      leftGeo = geo; leftGeoDeclare = declare; leftGeoCode = code
     }
 
     if(CodeGenUtil.isArcternExpr(rightExpr)){
-      val (geo, declare, code) = CodeGenUtil.extractGeometryConstructor(rightCode.code.toString())
+      val (geo, declare, code) = CodeGenUtil.geometryFromArcternExpr(rightCode.code.toString())
+      rightGeo = geo; rightGeoDeclare = declare; rightGeoCode = code
+    } else {
+      val (geo, declare, code) = CodeGenUtil.geometryFromNormalExpr(rightCode.code.toString())
       rightGeo = geo; rightGeoDeclare = declare; rightGeoCode = code
     }
 
@@ -114,7 +116,7 @@ abstract class ST_UnaryOp(f: String => String) extends ArcternExpr {
   override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = {
     val inputCode = inputExpr.genCode(ctx)
 
-    val (inputGeo, inputGeoDeclare, inputGeoCode) = CodeGenUtil.extractGeometryConstructor(inputCode.code.toString())
+    val (inputGeo, inputGeoDeclare, inputGeoCode) = CodeGenUtil.geometryFromArcternExpr(inputCode.code.toString())
 
     val assignment: String = dataType match {
       case _: GeometryUDT =>

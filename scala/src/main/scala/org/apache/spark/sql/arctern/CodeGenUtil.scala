@@ -16,13 +16,14 @@
 package org.apache.spark.sql.arctern
 
 import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.expressions.codegen.ExprCode
 
 abstract class ArcternExpr extends Expression {
   def isArcternExpr = true
 }
 
 object CodeGenUtil {
-  def extractGeometryConstructor(codeString: String) = {
+  def geometryFromArcternExpr(codeString: String) = {
     val serialKeyWords = s"${GeometryUDT.getClass().getName().dropRight(1)}.GeomSerialize"
 
     val serialIdx = codeString.lastIndexOf(serialKeyWords)
@@ -64,9 +65,21 @@ object CodeGenUtil {
     (geoName, geoDeclare, newCodeString)
   }
 
+  def geometryFromNormalExpr(exrCode: ExprCode) {
+    val geoName = exrCode.value + "_geo"
+    val geoDeclare = mutableGeometryInitCode(exrCode.value + "_geo")
+    val newCodeString = s"""
+                         |${exrCode.code}
+                         |$geoName = ${deserializeGeometryCode(exrCode.value)}
+                         """.stripMargin
+    (geoName, geoDeclare, newCodeString)
+  }
+
   def mutableGeometryInitCode(geo_name: String) = s"org.locationtech.jts.geom.Geometry $geo_name = null;"
 
   def serialGeometryCode(geo_code: String) = s"${GeometryUDT.getClass().getName().dropRight(1)}.GeomSerialize($geo_code);"
+
+  def deserializeGeometryCode(geo_code: String) = s"${GeometryUDT.getClass().getName().dropRight(1)}.GeomDeserialize($geo_code);"
 
   def isGeometryExpr(expr: Expression): Boolean = expr.dataType match {
     case _: GeometryUDT => true
