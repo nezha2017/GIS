@@ -76,15 +76,15 @@ object CodeGenUtil {
     (geoName, geoDeclare, newCodeString)
   }
 
-  def assignmentCode(f:String, dt: DataType ) = {
+  def assignmentCode(callFunc: String, value: String, dt: DataType ) = {
     dt match {
       case _: GeometryUDT =>
         s"""
-           |${mutableGeometryInitCode(s"${ev.value}_geo")}
-           |${ev.value}_geo = $f;
-           |${ev.value} = ${serialGeometryCode(s"${ev.value}_geo")}
+           |${mutableGeometryInitCode(value+"_geo")}
+           |${value}_geo = $callFunc;
+           |${value} = ${serialGeometryCode(value+"_geo")}
            |""".stripMargin
-      case _ => s"${ev.value} = $f;"
+      case _ => s"${ev.value} = $callFunc;"
     }
   }
 

@@ -118,7 +118,7 @@ abstract class ST_UnaryOp(f: String => String) extends ArcternExpr {
 
     val (inputGeo, inputGeoDeclare, inputGeoCode) = CodeGenUtil.geometryFromArcternExpr(inputCode.code.toString())
 
-    val assignment = CodeGenUtil.assignmentCode(f(inputGeo), dataType)
+    val assignment = CodeGenUtil.assignmentCode(f(inputGeo), ev.value, dataType)
 
     // val assignment: String = dataType match {
     //   case _: GeometryUDT =>
