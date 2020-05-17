@@ -40,12 +40,12 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
     assert(CodeGenUtil.isGeometryExpr(leftExpr))
     assert(CodeGenUtil.isGeometryExpr(rightExpr))
 
-    var leftGeo : String
-    var leftGeoDeclare : String
-    var leftGeoCode : String
-    var rightGeo : String
-    var rightGeoDeclare : String
-    var rightGeoCode : String
+    var leftGeo : String = ""
+    var leftGeoDeclare : String = ""
+    var leftGeoCode : String = ""
+    var rightGeo : String = ""
+    var rightGeoDeclare : String = ""
+    var rightGeoCode : String = ""
 
     val leftCode = leftExpr.genCode(ctx)
     val rightCode = rightExpr.genCode(ctx)
