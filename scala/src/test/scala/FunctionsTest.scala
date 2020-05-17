@@ -72,11 +72,11 @@ class FunctionsTest extends AdapterTest {
 
   test("ST_Centroid") {
     val data = Seq(
-      Row(1, "Polygon((0 0, 0 1, 1 1, 1 0, 0 0))"),
-      Row(2, "LINESTRING (0 0, 10 10, 20 20)")
+      Row(1, GeometryUDT.FromWkt("Polygon((0 0, 0 1, 1 1, 1 0, 0 0))")),
+      Row(2, GeometryUDT.FromWkt("LINESTRING (0 0, 10 10, 20 20)"))
     )
 
-    val schema = StructType(Array(StructField("idx", IntegerType, false), StructField("geo", StringType, false)))
+    val schema = StructType(Array(StructField("idx", IntegerType, false), StructField("geo", new GeometryUDT, false)))
     val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
     df.createOrReplaceTempView("data")
 
@@ -87,14 +87,14 @@ class FunctionsTest extends AdapterTest {
 
   }
 
-  test("ST_Centroid with null") {
+  test("ST_Centroid-Null") {
     val data = Seq(
       Row(1, "Polygon(0 0, 0 1, 1 1, 1 0, 0 0)"),
       Row(2, "LINESTRING (0 0, 10 10, 20 20)"),
-      Row(3, null)
+      Row(3, "error geo")
     )
 
-    val schema = StructType(Array(StructField("idx", IntegerType, false), StructField("geo", StringType, true)))
+    val schema = StructType(Array(StructField("idx", IntegerType, false), StructField("geo", StringType, false)))
     val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
     df.createOrReplaceTempView("data")
 
