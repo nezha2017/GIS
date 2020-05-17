@@ -34,7 +34,7 @@ class FunctionsTest extends AdapterTest {
      val rst = spark.sql("select idx, ST_Within(geo1, geo2) from data")
     //  val rst = spark.sql("select idx, geo1, geo2 from data")
   
-     rst.queryExecution.debug.codegen()
+    //  rst.queryExecution.debug.codegen()
      val collect = rst.collect()
   
      assert(collect(0).getBoolean(1) == true)
