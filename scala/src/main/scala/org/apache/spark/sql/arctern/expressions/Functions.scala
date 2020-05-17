@@ -105,26 +105,38 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
 
 abstract class ST_UnaryOp(f: String => String) extends ArcternExpr {
 
-  def inputExpr: Expression
+  def expr: Expression
 
-  override def nullable: Boolean = inputExpr.nullable
+  override def nullable: Boolean = expr.nullable
 
   override def eval(input: InternalRow): Any = {
     throw new RuntimeException("call implement method")
   }
 
-  override def children: Seq[Expression] = Seq(inputExpr)
+  override def children: Seq[Expression] = Seq(expr)
 
   override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = {
-    val inputCode = inputExpr.genCode(ctx)
+    assert(CodeGenUtil.isGeometryExpr(expr))
 
-    val (inputGeo, inputGeoDeclare, inputGeoCode) = CodeGenUtil.geometryFromArcternExpr(inputCode.code.toString())
+    val exprCode = expr.genCode(ctx)
 
-    val assignment = CodeGenUtil.assignmentCode(f(inputGeo), ev.value, dataType)
+    var exprGeo :String = ""
+    var exprGeoDeclare :String = ""
+    var exprGeoCode :String = ""
+
+    if(CodeGenUtil.isArcternExpr(expr)){
+      val (geo, declare, code) = CodeGenUtil.geometryFromArcternExpr(exprCode.code.toString())
+      exprGeo = geo; exprGeoDeclare = declare; exprGeoCode = code
+    } else {
+      val (geo, declare, code) = CodeGenUtil.geometryFromNormalExpr(exprCode)
+      exprGeo = geo; exprGeoDeclare = declare; exprGeoCode = code
+    }
+
+    val assignment = CodeGenUtil.assignmentCode(f(exprGeo), ev.value, dataType)
 
     if (nullable) {
       val nullSafeEval =
-        inputGeoCode + ctx.nullSafeExec(inputExpr.nullable, inputCode.isNull) {
+        exprGeoCode + ctx.nullSafeExec(expr.nullable, exprCode.isNull) {
           s"""
              |${ev.isNull} = false; // resultCode could change nullability.
              |$assignment
@@ -133,15 +145,15 @@ abstract class ST_UnaryOp(f: String => String) extends ArcternExpr {
       ev.copy(code =
         code"""
             boolean ${ev.isNull} = true;
-            $inputGeoDeclare
+            $exprGeoDeclare
             ${CodeGenerator.javaType(dataType)} ${ev.value} = ${CodeGenerator.defaultValue(dataType)};
             $nullSafeEval
             """)
     } else {
       ev.copy(code =
         code"""
-            $inputGeoDeclare
-            $inputGeoCode
+            $exprGeoDeclare
+            $exprGeoCode
             ${CodeGenerator.javaType(dataType)} ${ev.value} = ${CodeGenerator.defaultValue(dataType)};
             $assignment
             """, FalseLiteral)
@@ -167,7 +179,7 @@ case class ST_Centroid(inputsExpr: Seq[Expression])
 
   assert(inputsExpr.length == 1)
 
-  override def inputExpr: Expression = inputsExpr(0)
+  override def expr: Expression = inputsExpr(0)
 
   override def dataType: DataType = new GeometryUDT
 
