@@ -117,7 +117,11 @@ class FunctionsTest extends AdapterTest {
     df.createOrReplaceTempView("data")
     val rst = spark.sql("select idx, st_within(st_centroid(ST_GeomFromText(geo1)), st_centroid(ST_GeomFromText(geo2))) from data")
     rst.queryExecution.debug.codegen()
-    rst.show()
+    val collect = rst.collect()
+    assert(collect(0).getBoolean(1))
+    assert(collect(1).isNullAt(1))
+    assert(collect(2).isNullAt(1))
+    // rst.show()
   }
 
 }
