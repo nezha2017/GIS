@@ -115,7 +115,7 @@ class FunctionsTest extends AdapterTest {
     val schema = StructType(Array(StructField("idx", IntegerType, false), StructField("geo1", StringType, false), StructField("geo2", StringType, false)))
     val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
     df.createOrReplaceTempView("data")
-    val rst = spark.sql("select idx, st_within(st_centroid(geo1), st_centroid(geo2)) from data")
+    val rst = spark.sql("select idx, st_within(st_centroid(ST_GeomFromText(geo1)), st_centroid(ST_GeomFromText(geo2))) from data")
     rst.queryExecution.debug.codegen()
     rst.show()
   }
