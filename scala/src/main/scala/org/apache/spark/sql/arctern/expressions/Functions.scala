@@ -66,13 +66,15 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
       rightGeo = geo; rightGeoDeclare = declare; rightGeoCode = code
     }
 
+    val assignment = CodeGenUtil.assignmentCode(f(leftGeo, rightGeo), ev.value, dataType)
+
     if (nullable) {
       val nullSafeEval =
         leftGeoCode + ctx.nullSafeExec(leftExpr.nullable, leftCode.isNull) {
           rightGeoCode + ctx.nullSafeExec(rightExpr.nullable, rightCode.isNull) {
             s"""
                |${ev.isNull} = false; // resultCode could change nullability.
-               |${ev.value} = ${f(leftGeo, rightGeo)};
+               |$assignment
                |""".stripMargin
           }
         }
@@ -94,7 +96,7 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
           $leftGeoCode
           $rightGeoCode
           ${CodeGenerator.javaType(dataType)} ${ev.value} = ${CodeGenerator.defaultValue(dataType)};
-          ${ev.value} = ${f(leftGeo, rightGeo)};
+          $assignment
           """, FalseLiteral)
     }
   }
@@ -119,16 +121,6 @@ abstract class ST_UnaryOp(f: String => String) extends ArcternExpr {
     val (inputGeo, inputGeoDeclare, inputGeoCode) = CodeGenUtil.geometryFromArcternExpr(inputCode.code.toString())
 
     val assignment = CodeGenUtil.assignmentCode(f(inputGeo), ev.value, dataType)
-
-    // val assignment: String = dataType match {
-    //   case _: GeometryUDT =>
-    //     s"""
-    //        |${CodeGenUtil.mutableGeometryInitCode(s"${ev.value}_geo")}
-    //        |${ev.value}_geo = ${f(inputGeo)};
-    //        |${ev.value} = ${CodeGenUtil.serialGeometryCode(s"${ev.value}_geo")}
-    //        |""".stripMargin
-    //   case _ => s"${ev.value} = ${f(inputGeo)};"
-    // }
 
     if (nullable) {
       val nullSafeEval =
