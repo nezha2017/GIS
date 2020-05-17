@@ -45,7 +45,7 @@ class FunctionsTest extends AdapterTest {
     //  rst.show(false)
    }
 
-  test("ST_Within With Null") {
+  test("ST_Within-Null") {
     val data = Seq(
       Row(1, null, "POLYGON ((0 0, 40 0, 40 40, 0 40, 0 0))"),
       Row(2, "POINT (50 50)", null),

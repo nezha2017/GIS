@@ -38,6 +38,11 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
 
   override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = {
 
+    leftExpr match{
+      case expr: ArcternExpr => println("*************arcternExpr*******")
+      case _ => println("*************normalExpr****************")
+    }
+
     val leftCode = leftExpr.genCode(ctx)
     val rightCode = rightExpr.genCode(ctx)
 
