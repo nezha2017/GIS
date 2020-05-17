@@ -82,9 +82,9 @@ object CodeGenUtil {
         s"""
            |${mutableGeometryInitCode(value+"_geo")}
            |${value}_geo = $callFunc;
-           |${value} = ${serialGeometryCode(value+"_geo")}
+           |$value = ${serialGeometryCode(value+"_geo")}
            |""".stripMargin
-      case _ => s"${ev.value} = $callFunc;"
+      case _ => s"$value = $callFunc;"
     }
   }
 
