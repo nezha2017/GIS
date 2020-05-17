@@ -18,10 +18,7 @@ package org.apache.spark.sql.arctern
 import org.apache.spark.sql.catalyst.expressions.Expression
 
 abstract class ArcternExpr extends Expression {
-  def isGeometry = dataType match {
-    case _: GeometryUDT => true
-    case _ => false
-  }
+  def isArcternExpr = true
 }
 
 object CodeGenUtil {
@@ -71,8 +68,13 @@ object CodeGenUtil {
 
   def serialGeometryCode(geo_code: String) = s"${GeometryUDT.getClass().getName().dropRight(1)}.GeomSerialize($geo_code);"
 
-  def isGeometry(expr: Expression): Boolean = expr match {
-    case a: ArcternExpr => a.isGeometry
+  def isGeometryExpr(expr: Expression): Boolean = expr.dataType match {
+    case _: GeometryUDT => true
+    case _ => false
+  }
+
+  def isArcternExpr(expr: Expression): Boolean = expr match {
+    case _ : ArcternExpr => true
     case _ => false
   }
 }

@@ -37,17 +37,21 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
   override def children: Seq[Expression] = Seq(leftExpr, rightExpr)
 
   override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = {
+    assert(CodeGenUtil.isGeometryExpr(leftExpr))
+    assert(CodeGenUtil.isGeometryExpr(rightExpr))
 
-    leftExpr match{
-      case expr: ArcternExpr => println("*************arcternExpr*******")
-      case _ => println("*************normalExpr****************")
-    }
+    var leftGeo : String
+    var leftGeoDeclare : String
+    var leftGeoCode : String
+    var rightGeo : String
+    var rightGeoDeclare : String
+    var rightGeoCode : String
 
     val leftCode = leftExpr.genCode(ctx)
     val rightCode = rightExpr.genCode(ctx)
 
-    val (leftGeo, leftGeoDeclare, leftGeoCode) = CodeGenUtil.extractGeometryConstructor(leftCode.code.toString())
-    val (rightGeo, rightGeoDeclare, rightGeoCode) = CodeGenUtil.extractGeometryConstructor(rightCode.code.toString())
+    (leftGeo, leftGeoDeclare, leftGeoCode) = CodeGenUtil.extractGeometryConstructor(leftCode.code.toString())
+    (rightGeo, rightGeoDeclare, rightGeoCode) = CodeGenUtil.extractGeometryConstructor(rightCode.code.toString())
 
     if (nullable) {
       val nullSafeEval =
