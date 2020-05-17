@@ -80,8 +80,7 @@ class FunctionsTest extends AdapterTest {
     val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
     df.createOrReplaceTempView("data")
 
-    val rst = spark.sql("select idx, ST_Centroid(ST_GeomFromText(geo)) from data ")
-    //    val rst = spark.sql("select idx, ST_GeomFromText(geo) from data")
+    val rst = spark.sql("select idx, ST_Centroid(geo) from data ")
     //    rst.queryExecution.debug.codegen()
     rst.show()
 
