@@ -35,14 +35,14 @@ class FunctionsTest extends AdapterTest {
     //  val rst = spark.sql("select idx, geo1, geo2 from data")
   
      rst.queryExecution.debug.codegen()
-    //  val collect = rst.collect()
+     val collect = rst.collect()
   
-     //    assert(collect(0).getBoolean(1) == true)
-     //    assert(collect(1).getBoolean(1) == false)
-     //    assert(collect(2).getBoolean(1) == true)
-     //    assert(collect(3).getBoolean(1) == false)
+     assert(collect(0).getBoolean(1) == true)
+     assert(collect(1).getBoolean(1) == false)
+     assert(collect(2).getBoolean(1) == true)
+     assert(collect(3).getBoolean(1) == false)
   
-    //  rst.show(false)
+     rst.show(false)
    }
 
   test("ST_Within-Null") {
