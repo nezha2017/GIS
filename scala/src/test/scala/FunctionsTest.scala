@@ -31,8 +31,8 @@ class FunctionsTest extends AdapterTest {
      val schema = StructType(Array(StructField("idx", IntegerType, nullable = false), StructField("geo1", new GeometryUDT, nullable = false), StructField("geo2", new GeometryUDT, nullable = false)))
      val df = spark.createDataFrame(rdd_d, schema)
      df.createOrReplaceTempView("data")
-    //  val rst = spark.sql("select idx, ST_Within(geo1, geo2) from data")
-      val rst = spark.sql("select idx, geo1, geo2 from data")
+     val rst = spark.sql("select idx, ST_Within(geo1, geo2) from data")
+    //  val rst = spark.sql("select idx, geo1, geo2 from data")
   
      rst.queryExecution.debug.codegen()
     //  val collect = rst.collect()
