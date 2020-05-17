@@ -65,7 +65,7 @@ object CodeGenUtil {
     (geoName, geoDeclare, newCodeString)
   }
 
-  def geometryFromNormalExpr(exrCode: ExprCode) {
+  def geometryFromNormalExpr(exrCode: ExprCode) = {
     val geoName = exrCode.value + "_geo"
     val geoDeclare = mutableGeometryInitCode(exrCode.value + "_geo")
     val newCodeString = s"""
