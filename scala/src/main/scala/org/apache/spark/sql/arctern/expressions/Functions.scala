@@ -54,7 +54,7 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
       val (geo, declare, code) = CodeGenUtil.geometryFromArcternExpr(leftCode.code.toString())
       leftGeo = geo; leftGeoDeclare = declare; leftGeoCode = code
     } else {
-      val (geo, declare, code) = CodeGenUtil.geometryFromNormalExpr(leftCode.code.toString())
+      val (geo, declare, code) = CodeGenUtil.geometryFromNormalExpr(leftCode)
       leftGeo = geo; leftGeoDeclare = declare; leftGeoCode = code
     }
 
@@ -62,7 +62,7 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
       val (geo, declare, code) = CodeGenUtil.geometryFromArcternExpr(rightCode.code.toString())
       rightGeo = geo; rightGeoDeclare = declare; rightGeoCode = code
     } else {
-      val (geo, declare, code) = CodeGenUtil.geometryFromNormalExpr(rightCode.code.toString())
+      val (geo, declare, code) = CodeGenUtil.geometryFromNormalExpr(rightCode)
       rightGeo = geo; rightGeoDeclare = declare; rightGeoCode = code
     }
 
