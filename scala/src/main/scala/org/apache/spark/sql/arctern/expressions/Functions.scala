@@ -50,8 +50,15 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
     val leftCode = leftExpr.genCode(ctx)
     val rightCode = rightExpr.genCode(ctx)
 
-    (leftGeo, leftGeoDeclare, leftGeoCode) = CodeGenUtil.extractGeometryConstructor(leftCode.code.toString())
-    (rightGeo, rightGeoDeclare, rightGeoCode) = CodeGenUtil.extractGeometryConstructor(rightCode.code.toString())
+    if(CodeGenUtil.isArcternExpr(leftExpr)){
+      val (geo, declare, code) = CodeGenUtil.extractGeometryConstructor(leftCode.code.toString())
+      leftGeo = geo, leftGeoDeclare = declare, leftGeoCode = code
+    }
+
+    if(CodeGenUtil.isArcternExpr(rightExpr)){
+      val (geo, declare, code) = CodeGenUtil.extractGeometryConstructor(rightCode.code.toString())
+      rightGeo = geo, rightGeoDeclare = declare, rightGeoCode = code
+    }
 
     if (nullable) {
       val nullSafeEval =
