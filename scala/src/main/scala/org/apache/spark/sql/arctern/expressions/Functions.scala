@@ -53,6 +53,10 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
     if(CodeGenUtil.isArcternExpr(leftExpr)){
       val (geo, declare, code) = CodeGenUtil.extractGeometryConstructor(leftCode.code.toString())
       leftGeo = geo; leftGeoDeclare = declare; leftGeoCode = code
+    }else{
+      println("============= leftCode =================")
+      println(leftCode.code.toString)
+      println("==============================")
     }
 
     if(CodeGenUtil.isArcternExpr(rightExpr)){
