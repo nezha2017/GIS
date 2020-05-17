@@ -106,4 +106,18 @@ class FunctionsTest extends AdapterTest {
 
   }
 
+  test("ST_Within-Nest"){
+    val data = Seq(
+      Row(1, "polygon((0 0, 0 1,1 1, 1 0, 0 0))", "polygon((0 0, 0 1,1 1, 1 0, 0 0))"),
+      Row(2, "error geo", "polygon((0 0, 0 1,1 1, 1 0, 0 0))"),
+      Row(3, "polygon((0 0, 0 1,1 1, 1 0, 0 0))", "error geo")
+    )
+    val schema = StructType(Array(StructField("idx", IntegerType, false), StructField("geo1", StringType, false), StructField("geo2", StringType, false)))
+    val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
+    df.createOrReplaceTempView("data")
+    rst = spark.sql("select idx, st_within(st_centroid(geo1), st_centroid(geo2)) from data")
+    rst.queryExecution.debug.codegen()
+    rst.show()
+  }
+
 }
