@@ -19,33 +19,33 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.arctern._
 
 class FunctionsTest extends AdapterTest {
-//  test("ST_Within") {
-  //    val data = Seq(
-  //      Row(1, GeometryUDT.FromWkt("POINT (20 20)"), GeometryUDT.FromWkt("POLYGON ((0 0, 40 0, 40 40, 0 40, 0 0))")),
-  //      Row(2, GeometryUDT.FromWkt("POINT (50 50)"), GeometryUDT.FromWkt("POLYGON ((0 0, 40 0, 40 40, 0 40, 0 0))")),
-  //      Row(3, GeometryUDT.FromWkt("POLYGON ((10 10, 20 10, 20 20, 10 20, 10 10))"), GeometryUDT.FromWkt("POLYGON ((0 0, 40 0, 40 40, 0 40, 0 0))")),
-  //      Row(4, GeometryUDT.FromWkt("POLYGON ((10 10, 50 10, 50 50, 10 50, 10 10))"), GeometryUDT.FromWkt("POLYGON ((0 0, 40 0, 40 40, 0 40, 0 0))"))
-  //    )
-  //
-  //    val rdd_d = spark.sparkContext.parallelize(data)
-  //    val schema = StructType(Array(StructField("idx", IntegerType, nullable = false), StructField("geo1", new GeometryUDT, nullable = false), StructField("geo2", new GeometryUDT, nullable = false)))
-  //    val df = spark.createDataFrame(rdd_d, schema)
-  //    df.createOrReplaceTempView("data")
-  //    val rst = spark.sql("select idx, ST_Within(geo1, geo2) from data")
-  //    //    val rst = spark.sql("select idx, geo1, geo2 from data")
-  //
-  //    rst.queryExecution.debug.codegen()
-  //    val collect = rst.collect()
-  //
-  //    //    assert(collect(0).getBoolean(1) == true)
-  //    //    assert(collect(1).getBoolean(1) == false)
-  //    //    assert(collect(2).getBoolean(1) == true)
-  //    //    assert(collect(3).getBoolean(1) == false)
-  //
-  //    rst.show(false)
-  //  }
+ test("ST_Within") {
+     val data = Seq(
+       Row(1, GeometryUDT.FromWkt("POINT (20 20)"), GeometryUDT.FromWkt("POLYGON ((0 0, 40 0, 40 40, 0 40, 0 0))")),
+       Row(2, GeometryUDT.FromWkt("POINT (50 50)"), GeometryUDT.FromWkt("POLYGON ((0 0, 40 0, 40 40, 0 40, 0 0))")),
+       Row(3, GeometryUDT.FromWkt("POLYGON ((10 10, 20 10, 20 20, 10 20, 10 10))"), GeometryUDT.FromWkt("POLYGON ((0 0, 40 0, 40 40, 0 40, 0 0))")),
+       Row(4, GeometryUDT.FromWkt("POLYGON ((10 10, 50 10, 50 50, 10 50, 10 10))"), GeometryUDT.FromWkt("POLYGON ((0 0, 40 0, 40 40, 0 40, 0 0))"))
+     )
+  
+     val rdd_d = spark.sparkContext.parallelize(data)
+     val schema = StructType(Array(StructField("idx", IntegerType, nullable = false), StructField("geo1", new GeometryUDT, nullable = false), StructField("geo2", new GeometryUDT, nullable = false)))
+     val df = spark.createDataFrame(rdd_d, schema)
+     df.createOrReplaceTempView("data")
+     val rst = spark.sql("select idx, ST_Within(geo1, geo2) from data")
+    //  val rst = spark.sql("select idx, geo1, geo2 from data")
+  
+    //  rst.queryExecution.debug.codegen()
+     val collect = rst.collect()
+  
+     assert(collect(0).getBoolean(1) == true)
+     assert(collect(1).getBoolean(1) == false)
+     assert(collect(2).getBoolean(1) == true)
+     assert(collect(3).getBoolean(1) == false)
+  
+     rst.show(false)
+   }
 
-  test("ST_Within With Null") {
+  test("ST_Within-Null") {
     val data = Seq(
       Row(1, null, "POLYGON ((0 0, 40 0, 40 40, 0 40, 0 0))"),
       Row(2, "POINT (50 50)", null),

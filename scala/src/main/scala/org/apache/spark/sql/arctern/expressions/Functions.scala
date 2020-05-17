@@ -37,12 +37,36 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
   override def children: Seq[Expression] = Seq(leftExpr, rightExpr)
 
   override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = {
+    assert(CodeGenUtil.isGeometryExpr(leftExpr))
+    assert(CodeGenUtil.isGeometryExpr(rightExpr))
+
+    var leftGeo : String = ""
+    var leftGeoDeclare : String = ""
+    var leftGeoCode : String = ""
+    var rightGeo : String = ""
+    var rightGeoDeclare : String = ""
+    var rightGeoCode : String = ""
 
     val leftCode = leftExpr.genCode(ctx)
     val rightCode = rightExpr.genCode(ctx)
 
-    val (leftGeo, leftGeoDeclare, leftGeoCode) = CodeGenUtil.extractGeometryConstructor(leftCode.code.toString())
-    val (rightGeo, rightGeoDeclare, rightGeoCode) = CodeGenUtil.extractGeometryConstructor(rightCode.code.toString())
+    if(CodeGenUtil.isArcternExpr(leftExpr)){
+      val (geo, declare, code) = CodeGenUtil.geometryFromArcternExpr(leftCode.code.toString())
+      leftGeo = geo; leftGeoDeclare = declare; leftGeoCode = code
+    } else {
+      val (geo, declare, code) = CodeGenUtil.geometryFromNormalExpr(leftCode)
+      leftGeo = geo; leftGeoDeclare = declare; leftGeoCode = code
+    }
+
+    if(CodeGenUtil.isArcternExpr(rightExpr)){
+      val (geo, declare, code) = CodeGenUtil.geometryFromArcternExpr(rightCode.code.toString())
+      rightGeo = geo; rightGeoDeclare = declare; rightGeoCode = code
+    } else {
+      val (geo, declare, code) = CodeGenUtil.geometryFromNormalExpr(rightCode)
+      rightGeo = geo; rightGeoDeclare = declare; rightGeoCode = code
+    }
+
+    val assignment = CodeGenUtil.assignmentCode(f(leftGeo, rightGeo), ev.value, dataType)
 
     if (nullable) {
       val nullSafeEval =
@@ -50,7 +74,7 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
           rightGeoCode + ctx.nullSafeExec(rightExpr.nullable, rightCode.isNull) {
             s"""
                |${ev.isNull} = false; // resultCode could change nullability.
-               |${ev.value} = ${f(leftGeo, rightGeo)};
+               |$assignment
                |""".stripMargin
           }
         }
@@ -72,7 +96,7 @@ abstract class ST_BinaryOp(f: (String, String) => String) extends ArcternExpr {
           $leftGeoCode
           $rightGeoCode
           ${CodeGenerator.javaType(dataType)} ${ev.value} = ${CodeGenerator.defaultValue(dataType)};
-          ${ev.value} = ${f(leftGeo, rightGeo)};
+          $assignment
           """, FalseLiteral)
     }
   }
@@ -94,17 +118,9 @@ abstract class ST_UnaryOp(f: String => String) extends ArcternExpr {
   override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = {
     val inputCode = inputExpr.genCode(ctx)
 
-    val (inputGeo, inputGeoDeclare, inputGeoCode) = CodeGenUtil.extractGeometryConstructor(inputCode.code.toString())
+    val (inputGeo, inputGeoDeclare, inputGeoCode) = CodeGenUtil.geometryFromArcternExpr(inputCode.code.toString())
 
-    val assignment: String = dataType match {
-      case _: GeometryUDT =>
-        s"""
-           |${CodeGenUtil.mutableGeometryInitCode(s"${ev.value}_geo")}
-           |${ev.value}_geo = ${f(inputGeo)};
-           |${ev.value} = ${CodeGenUtil.serialGeometryCode(s"${ev.value}_geo")}
-           |""".stripMargin
-      case _ => s"${ev.value} = ${f(inputGeo)};"
-    }
+    val assignment = CodeGenUtil.assignmentCode(f(inputGeo), ev.value, dataType)
 
     if (nullable) {
       val nullSafeEval =
