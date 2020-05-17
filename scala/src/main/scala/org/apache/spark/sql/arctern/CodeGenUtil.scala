@@ -17,6 +17,7 @@ package org.apache.spark.sql.arctern
 
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.ExprCode
+import org.apache.spark.sql.types.DataType
 
 abstract class ArcternExpr extends Expression {
   def isArcternExpr = true
@@ -73,6 +74,18 @@ object CodeGenUtil {
                          |$geoName = ${deserializeGeometryCode(exrCode.value)}
                          """.stripMargin
     (geoName, geoDeclare, newCodeString)
+  }
+
+  def assignmentCode(f:String, dt: DataType ) = {
+    dt match {
+      case _: GeometryUDT =>
+        s"""
+           |${mutableGeometryInitCode(s"${ev.value}_geo")}
+           |${ev.value}_geo = $f;
+           |${ev.value} = ${serialGeometryCode(s"${ev.value}_geo")}
+           |""".stripMargin
+      case _ => s"${ev.value} = $f;"
+    }
   }
 
   def mutableGeometryInitCode(geo_name: String) = s"org.locationtech.jts.geom.Geometry $geo_name = null;"
