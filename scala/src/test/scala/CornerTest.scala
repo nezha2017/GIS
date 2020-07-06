@@ -101,14 +101,7 @@ class CornerTest extends AdapterTest {
       spark.sparkContext.parallelize(polygons_text_data),
       StructType(Seq(StructField("polygons_text", StringType)))
     ).withColumn("id", monotonically_increasing_id())
-
-    //    points_text.select(st_geomfromtext(col("points_text"))).show()
-    //    points_text.select(col("points_text")).show()
-    //    println("=================")
-    //    points_text.select(st_geomfromtext(col("points_text"))).show()
-    //    points_text.printSchema()
-
-
+    
     val points = points_text.select(st_geomfromtext(col("points_text")).as("points"))
     val polygons = polygons_text.select(st_astext(st_geomfromtext(col("polygons_text"))).as("polygons_text_again"))
 
