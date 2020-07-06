@@ -92,6 +92,8 @@ class CornerTest extends AdapterTest {
 
 //    points_text.select(st_geomfromtext(col("points_text"))).show()
     points_text.select(col("points_text")).show()
+    println("=================")
+    points_text.select(st_geomfromtext(col("points_text"))).show()
     points_text.printSchema()
 
 
