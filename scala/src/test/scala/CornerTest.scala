@@ -90,12 +90,15 @@ class CornerTest extends AdapterTest {
       "Polygon((6 6, 9 6, 9 9, 6 9, 6 6))",
     ).toDF("polygons_text").withColumn("id", monotonically_increasing_id())
 
-    val points = points_text.select(st_geomfromtext('points_text).as("points"))
-    val polygons = polygons_text.select(st_astext(st_geomfromtext('polygons_text)).as("polygons_text_again"))
+    points_text.show()
+    polygons_text.show()
+
+    //val points = points_text.select(st_geomfromtext('points_text).as("points"))
+    //val polygons = polygons_text.select(st_astext(st_geomfromtext('polygons_text)).as("polygons_text_again"))
 
     // both are unusable
-    points.show()
-    polygons.show()
+    //points.show()
+    //polygons.show()
 
   }
 }
