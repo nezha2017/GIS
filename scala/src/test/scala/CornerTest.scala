@@ -91,7 +91,7 @@ class CornerTest extends AdapterTest {
     ).toDF("polygons_text").withColumn("id", monotonically_increasing_id())
 
 //    points_text.show()
-    points_text.select(st_geomfromtext('points_text))
+    points_text.select(st_geomfromtext('points_text)).show()
     points_text.printSchema()
 //    polygons_text.show()
 
