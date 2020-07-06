@@ -83,13 +83,12 @@ class CornerTest extends AdapterTest {
       "Point(4 5)",
       "Point(8 8)",
       "Point(10 10)",
-    ).toDF("points_text").withColumn("attr", monotonically_increasing_id())
+    ).toDF("points_text")
     val polygons_text = Seq(
       "Polygon((0 0, 3 0, 3 3, 0 3, 0 0))",
       "Polygon((6 6, 3 6, 3 3, 6 3, 6 6))",
       "Polygon((6 6, 9 6, 9 9, 6 9, 6 6))",
-    ).toDF("polygons_text").withColumn("id", monotonically_increasing_id())
-
+    ).toDF("polygons_text")
 //    points_text.select(st_geomfromtext(col("points_text"))).show()
     points_text.select(col("points_text")).show()
     println("=================")
