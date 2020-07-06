@@ -85,7 +85,7 @@ class CornerTest extends AdapterTest {
       Row("Point(10 10)"),
     )
     val points_text_rdd = spark.sparkContext.parallelize(points_text_data)
-    val points_text_schema = StructType(Seq(StructField("points_test", StringType)))
+    val points_text_schema = StructType(Seq(StructField("points_text", StringType)))
     val points_text = spark.createDataFrame(
       points_text_rdd,
       points_text_schema
